@@ -22,18 +22,19 @@ contract SimpleStaking is Initializable, OwnableUpgradeable {
     mapping(address => StakingState) public stakingState;
 
     uint256 public constant STAKING_AMOUNT = 111;
-    uint256 public immutable STAKING_LOCK = 90 days;
+    uint256 public constant STAKING_LOCK = 90 days;
 
-    IERC20 public immutable stakingToken;
+    IERC20 public stakingToken;
 
-    constructor(IERC20 _stakingToken) {
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
         _disableInitializers();
-
-        stakingToken = _stakingToken;
     }
 
-    function initialize(address initialOwner) public initializer {
-        __Ownable_init(initialOwner);
+    function initialize(address _stakingToken) public initializer {
+        __Ownable_init(msg.sender);
+
+        stakingToken = IERC20(_stakingToken);
     }
 
     function stake() public {
