@@ -10,8 +10,8 @@ contract SimpleStaking is Initializable, OwnableUpgradeable {
     event Unstaked(address indexed user, uint256 amount);
 
     enum StakingStatus {
-        Staked,
-        NotStaked
+        NotStaked,
+        Staked
     }
 
     struct StakingState {
