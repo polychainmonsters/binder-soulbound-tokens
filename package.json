@@ -11,6 +11,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/hardhat-upgrades": "^3.0.3",
+    "@openzeppelin/merkle-tree": "^1.0.6",
     "hardhat": "^2.20.1"
   },
   "dependencies": {
