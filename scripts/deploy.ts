@@ -1,22 +1,14 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
+  const SimpleStaking = await ethers.getContractFactory("SimpleStaking");
+  const simpleStaking = await upgrades.deployProxy(SimpleStaking, [
+    "0xBC9B77acA82f6BE43927076D71cd453b625165B8"
+  ]);
 
-  const lockedAmount = ethers.parseEther("0.001");
+  await simpleStaking.waitForDeployment();
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
-
-  await lock.waitForDeployment();
-
-  console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
-  );
+  console.log("SimpleStaking deployed to:", await simpleStaking.getAddress());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -6,8 +6,9 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract SimpleStaking is Initializable, OwnableUpgradeable {
-    event Staked(address indexed user, uint256 amount);
-    event Unstaked(address indexed user, uint256 amount);
+    /// @dev ID is the binder battles ID
+    event Staked(address indexed user, uint256 indexed id, uint256 amount);
+    event Unstaked(address indexed user, uint256 indexed id, uint256 amount);
 
     enum StakingStatus {
         NotStaked,
@@ -20,9 +21,10 @@ contract SimpleStaking is Initializable, OwnableUpgradeable {
     }
 
     mapping(address => StakingState) public stakingState;
+    mapping(uint256 => address) public userAddress;
 
     uint256 public constant STAKING_AMOUNT = 111;
-    uint256 public constant STAKING_LOCK = 90 days;
+    uint256 public constant STAKING_LOCK = 1 hours;
 
     IERC20 public stakingToken;
 
@@ -37,11 +39,13 @@ contract SimpleStaking is Initializable, OwnableUpgradeable {
         stakingToken = IERC20(_stakingToken);
     }
 
-    function stake() public {
+    function stake(uint256 id) public {
         require(
             stakingState[msg.sender].status == StakingStatus.NotStaked,
             "Already staked"
         );
+        require(userAddress[id] == address(0), "Already staked");
+
         stakingState[msg.sender] = StakingState({
             status: StakingStatus.Staked,
             stakedAt: block.timestamp
@@ -49,10 +53,10 @@ contract SimpleStaking is Initializable, OwnableUpgradeable {
 
         stakingToken.transferFrom(msg.sender, address(this), STAKING_AMOUNT);
 
-        emit Staked(msg.sender, STAKING_AMOUNT);
+        emit Staked(msg.sender, id, STAKING_AMOUNT);
     }
 
-    function unstake() public {
+    function unstake(uint256 id) public {
         require(
             stakingState[msg.sender].status == StakingStatus.Staked,
             "Not staked"
@@ -61,10 +65,14 @@ contract SimpleStaking is Initializable, OwnableUpgradeable {
             block.timestamp - stakingState[msg.sender].stakedAt > STAKING_LOCK,
             "Staking is locked"
         );
+        require(
+            userAddress[id] == msg.sender,
+            "Not yours"
+        );
 
         stakingState[msg.sender].status = StakingStatus.NotStaked;
         stakingToken.transfer(msg.sender, STAKING_AMOUNT);
 
-        emit Unstaked(msg.sender, STAKING_AMOUNT);
+        emit Unstaked(msg.sender, id, STAKING_AMOUNT);
     }
 }

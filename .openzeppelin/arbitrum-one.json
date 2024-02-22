@@ -1,0 +1,587 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xCA9165523392209f6b6C8977b7D412E434c51317",
+      "txHash": "0xef3cf20bed5c8a340fa19d4b77689cf615a3554df6f423d0e3bd9b72a37560bc",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x3b1061f4204Fd1EaFC6fA3136195c2ECC149afD1",
+      "txHash": "0xad58f6fa78fd78340fba15c167c4dc5a079ff7b51b1c3f29def50e5656837deb",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x011Fe1613E0fF871C785A678587c1169FE1d7112",
+      "txHash": "0x75c28f2ab11558f97ffd76ace00556e0d367f79fce1ebeeb755be6e741f00bce",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xee9160A7FC578A4DDBE873F02fBb12e24c6C657A",
+      "txHash": "0xa60c8886c4e08acc2826f6d6882b913d114eadb73fe639ddee440cd8cbe37546",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "397d8e3a4e166428f5884bad86701b768cb8441323a71332ca55ba950fc0623a": {
+      "address": "0xAa57c81d4fFf894Bd5284baD14Db0166834cd8E1",
+      "txHash": "0x76d33f0c03c2233c4ca072b5277202000e5823b17a245050ed433384ca8cf6b6",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "stakingState",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_struct(StakingState)1461_storage)",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:22"
+          },
+          {
+            "label": "stakingToken",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IERC20)1372",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:27"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)1372": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingStatus)1455": {
+            "label": "enum SimpleStaking.StakingStatus",
+            "members": [
+              "Staked",
+              "NotStaked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(StakingState)1461_storage)": {
+            "label": "mapping(address => struct SimpleStaking.StakingState)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(StakingState)1461_storage": {
+            "label": "struct SimpleStaking.StakingState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(StakingStatus)1455",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stakedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "598f06dd9a8b3164d9467f3e5715f289ab859451e9a9a6a03062255e4c479869": {
+      "address": "0xc34211ccd5A99bF72b31d85402Df5E4A234AAf5E",
+      "txHash": "0x407c3d11da2cd5d4d1a209712797c79b09d813a6b9ad54fb7e916b505570af21",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "stakingState",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_struct(StakingState)605_storage)",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:22"
+          },
+          {
+            "label": "stakingToken",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IERC20)572",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:27"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)572": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingStatus)599": {
+            "label": "enum SimpleStaking.StakingStatus",
+            "members": [
+              "Staked",
+              "NotStaked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(StakingState)605_storage)": {
+            "label": "mapping(address => struct SimpleStaking.StakingState)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(StakingState)605_storage": {
+            "label": "struct SimpleStaking.StakingState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(StakingStatus)599",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stakedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "98ea2951a2aff88510d8f5c6221908028514d9a756d3ba1777704f5dac13b22c": {
+      "address": "0x965dEBF9ad12b78Ba54EdbB3e9406dd6C087CB6d",
+      "txHash": "0x2d1717c23274ebfab4e9cbd65bbdcc66c0d9201537a4144fd73574661e65865a",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "stakingState",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_struct(StakingState)3595_storage)",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:22"
+          },
+          {
+            "label": "stakingToken",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IERC20)1926",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:27"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)1926": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingStatus)3589": {
+            "label": "enum SimpleStaking.StakingStatus",
+            "members": [
+              "NotStaked",
+              "Staked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(StakingState)3595_storage)": {
+            "label": "mapping(address => struct SimpleStaking.StakingState)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(StakingState)3595_storage": {
+            "label": "struct SimpleStaking.StakingState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(StakingStatus)3589",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stakedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "92334a2054320e8eadf8a09a3585d44cf36a3e189d9ed9ac3a2586cc7586ea5a": {
+      "address": "0xbf0AECB29E1846A21B0FBE759936ec5AbF8129fd",
+      "txHash": "0xf18b4584f137bea259078f7087012a34741b72e1c4ed552acafb8cdd79427e7b",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "stakingState",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_struct(StakingState)610_storage)",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:23"
+          },
+          {
+            "label": "userAddress",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_uint256,t_address)",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:24"
+          },
+          {
+            "label": "stakingToken",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IERC20)572",
+            "contract": "SimpleStaking",
+            "src": "contracts/SimpleStaking.sol:29"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)64_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)572": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_enum(StakingStatus)604": {
+            "label": "enum SimpleStaking.StakingStatus",
+            "members": [
+              "NotStaked",
+              "Staked"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_struct(StakingState)610_storage)": {
+            "label": "mapping(address => struct SimpleStaking.StakingState)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(StakingState)610_storage": {
+            "label": "struct SimpleStaking.StakingState",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_enum(StakingStatus)604",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "stakedAt",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
