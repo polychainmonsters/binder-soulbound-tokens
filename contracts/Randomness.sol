@@ -90,6 +90,21 @@ contract Randomness is Initializable {
         }
     }
 
+    /** RESTART RANDOMNESS REQUEST */
+    // if there is no commit but the commit period is over the request can be restarted
+    function restartRandomnessRequest(uint128 id) public {
+        RandomnessRequest memory request = idToRequest[id];
+
+        require(request.commitEndtime != 0, "request does not exist");
+        require(
+            block.timestamp > request.commitEndtime + request.duration,
+            "reveal period not over"
+        );
+
+        delete idToRequest[id];
+        delete idToRandomness[id];
+    }
+
     /** READ RANDOMNESS */
 
     function readRandomness(uint128 id) public view returns (uint256) {
@@ -97,9 +112,10 @@ contract Randomness is Initializable {
         RandomnessRequest memory request = idToRequest[id];
 
         require(request.commitEndtime != 0, "request does not exist");
+
         require(
             block.timestamp > request.commitEndtime + request.duration,
-            "reveal period not over"
+            "reveal period or commit period not over"
         );
 
         require(idToRandomness[id] != 0, "randomness not set");
