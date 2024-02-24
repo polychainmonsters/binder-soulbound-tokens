@@ -191,5 +191,99 @@ describe.only("Randomness", async () => {
         randomness.revealRandomness(requestId, fakeRandomValue)
       ).to.be.revertedWith("randomness hash does not exist");
     });
+
+    it("should be able to get the randomness if revealed", async () => {
+      const { randomness } = await loadFixture(deployFixture);
+
+      const { requestId } = await requestRandomness(randomness);
+
+      const randomValue = ethers.toBigInt(ethers.randomBytes(32));
+
+      const hash = await randomness.hash(randomValue);
+      await randomness.commitRandomness(requestId, hash);
+
+      // that ends the commit period
+      await ethers.provider.send("evm_increaseTime", [300]);
+
+      await randomness.revealRandomness(requestId, randomValue);
+
+      // now we end the reveal period and mine a block
+      await ethers.provider.send("evm_increaseTime", [300]);
+      await ethers.provider.send("evm_mine", []);
+
+      const randomnessValue = await randomness.readRandomness(requestId);
+
+      expect(randomnessValue).to.equal(randomValue);
+    });
+
+    // should not be able to get the randomness if commit phase not over
+    it("should not be able to get the randomness if not committed", async () => {
+      const { randomness } = await loadFixture(deployFixture);
+
+      const { requestId } = await requestRandomness(randomness);
+
+      await expect(randomness.readRandomness(requestId)).to.be.revertedWith(
+        "reveal period or commit period not over"
+      );
+    });
+
+    // should not be able to get the randomness if reveal phase not over
+    it("should not be able to get the randomness if not revealed", async () => {
+      const { randomness } = await loadFixture(deployFixture);
+
+      const { requestId } = await requestRandomness(randomness);
+
+      const randomValue = ethers.toBigInt(ethers.randomBytes(32));
+
+      const hash = await randomness.hash(randomValue);
+      await randomness.commitRandomness(requestId, hash);
+
+      // that ends the commit period but not the reveal period
+      await ethers.provider.send("evm_increaseTime", [301]);
+      await ethers.provider.send("evm_mine", []);
+
+      await expect(randomness.readRandomness(requestId)).to.be.revertedWith(
+        "reveal period or commit period not over"
+      );
+    });
+
+    // should not be able to get the randomness if no randomess got commited or reveald
+    it("should not be able to get the randomness if no randomess got commited or reveald", async () => {
+      const { randomness } = await loadFixture(deployFixture);
+
+      const { requestId } = await requestRandomness(randomness);
+
+      // that ends the commit and the reveal period
+      await ethers.provider.send("evm_increaseTime", [601]);
+      await ethers.provider.send("evm_mine", []);
+
+      await expect(randomness.readRandomness(requestId)).to.be.revertedWith(
+        "randomness not set"
+      );
+    });
+
+    // should not be able to get the randomness if request doesnt exist
+    it("should not be able to get the randomness if request doesnt exist", async () => {
+      const { randomness } = await loadFixture(deployFixture);
+
+      const randomValue = ethers.toBigInt(ethers.randomBytes(32));
+
+      const { requestId } = await requestRandomness(randomness);
+
+      const hash = await randomness.hash(randomValue);
+      await randomness.commitRandomness(1, hash);
+
+      // that ends the commit period
+      await ethers.provider.send("evm_increaseTime", [300]);
+      await randomness.revealRandomness(1, randomValue);
+
+      // now we end the reveal period
+      await ethers.provider.send("evm_increaseTime", [300]);
+      await ethers.provider.send("evm_mine", []);
+
+      await expect(
+        randomness.readRandomness(requestId + 1n)
+      ).to.be.revertedWith("request does not exist");
+    });
   });
 });
