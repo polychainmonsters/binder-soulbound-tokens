@@ -6,12 +6,12 @@ import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Ini
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
-
-// enumerable
 
 contract Soulbound is
     Initializable,
@@ -20,8 +20,13 @@ contract Soulbound is
     ERC721BurnableUpgradeable,
     OwnableUpgradeable
 {
+    using Checkpoints for Checkpoints.Trace208;
+
+    Checkpoints.Trace208 private _totalCumulativePoints;
+    mapping(uint16 => Checkpoints.Trace208) private _weeklyCumulativePoints;
+
     struct Token {
-        uint224 points;
+        uint48 points;
         uint16 rank;
         uint16 week;
     }
@@ -93,9 +98,48 @@ contract Soulbound is
         weekToRankToMintingStatus[token.week][token.rank] = MintingStatus
             .Minted;
 
+        _push(_totalCumulativePoints, _nextTokenId, token.points);
+        _push(_weeklyCumulativePoints[token.week], _nextTokenId, token.points);
+
         _mint(to, _nextTokenId);
 
         _nextTokenId++;
+    }
+
+    /** POINTS */
+
+    // see https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v5.0.1/contracts/governance/utils/Votes.sol
+
+    function _push(
+        Checkpoints.Trace208 storage store,
+        uint256 tokenId,
+        uint48 deltaPoints
+    ) private returns (uint208, uint208) {
+        // push(key, value)
+        // we use the cumulative points as key
+        (, uint48 _newestKey, ) = store.latestCheckpoint();
+        return
+            store.push(_newestKey + deltaPoints, SafeCast.toUint208(tokenId));
+    }
+
+    function upperLookupTotal(uint48 searchKey) public view returns (uint208) {
+        return _upperLookup(_totalCumulativePoints, searchKey);
+    }
+
+    function upperLookupWeekly(
+        uint48 searchKey,
+        uint16 week
+    ) public view returns (uint208) {
+        return _upperLookup(_weeklyCumulativePoints[week], searchKey);
+    }
+
+    function _upperLookup(
+        Checkpoints.Trace208 storage store,
+        uint48 searchKey
+    ) internal view returns (uint208) {
+        (, uint48 _newestKey, ) = store.latestCheckpoint();
+        require(searchKey <= _newestKey, "searchKey too high");
+        return store.lowerLookup(searchKey);
     }
 
     /** TOKEN URI */

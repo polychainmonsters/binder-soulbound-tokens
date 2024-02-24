@@ -3,7 +3,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { getProof, getTree } from "../utils/merkle-tree";
 
-describe.only("Soulbound", function () {
+describe("Soulbound", function () {
   async function deployFixture() {
     const [owner, otherAccount] = await ethers.getSigners();
 
@@ -382,6 +382,40 @@ describe.only("Soulbound", function () {
       console.log(
         await soulbound.tokenIdToToken((await soulbound.totalSupply()) - 1n)
       );
+    });
+  });
+
+  describe("Raffle", async function () {
+    it("upperLookup", async function () {
+      // we mint all the tokens
+      const { soulbound, tokens } = await loadFixture(deployFixture);
+
+      let totalPoints = 1;
+      for (let i = 0; i < tokens.length; i++) {
+        const tree = getTree(tokens);
+        const proof = getProof({
+          tree,
+          receiver: tokens[i].address,
+        });
+        await soulbound.mint(
+          tokens[i].address,
+          {
+            points: tokens[i].points,
+            rank: tokens[i].rank,
+            week: tokens[i].week,
+          },
+          proof!.proof
+        );
+
+        for (let j = totalPoints; j < totalPoints + tokens[i].points; j++) {
+          const lookup = await soulbound.upperLookupTotal(j);
+
+          // it should be the tokenId that we just minted (which is i)
+          expect(lookup).to.equal(i);
+        }
+
+        totalPoints += tokens[i].points;
+      }
     });
   });
 });
