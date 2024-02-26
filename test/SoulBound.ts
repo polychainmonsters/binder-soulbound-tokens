@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { getProof, getTree } from "../utils/merkle-tree";
 import { Contract } from "ethers";
 
-describe.only("Soulbound", function () {
+describe("Soulbound", function () {
   async function deployFixture() {
     const [owner, otherAccount] = await ethers.getSigners();
 
@@ -508,7 +508,7 @@ describe.only("Soulbound", function () {
       expect(pickRequestsAfterNewTokenMints).to.deep.equal(pickRequests);
     });
 
-    it.only("request total points pick and get the winner", async function () {
+    it("request total points pick and get the winner", async function () {
       const { soulbound, tokens, randomness } = await loadFixture(
         deployFixture
       );
