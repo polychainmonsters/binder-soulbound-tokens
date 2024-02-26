@@ -2,16 +2,23 @@ import { ethers, upgrades } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import { getProof, getTree } from "../utils/merkle-tree";
+import { Contract } from "ethers";
 
-describe("Soulbound", function () {
+describe.only("Soulbound", function () {
   async function deployFixture() {
     const [owner, otherAccount] = await ethers.getSigners();
 
     const Mock20 = await ethers.getContractFactory("Mock20");
     const mock20 = await Mock20.deploy();
 
+    const Randomness = await ethers.getContractFactory("Randomness");
+    const randomness = await upgrades.deployProxy(Randomness, []);
+    await randomness.waitForDeployment();
+
     const Soulbound = await ethers.getContractFactory("Soulbound");
-    const soulbound = await upgrades.deployProxy(Soulbound, []);
+    const soulbound = await upgrades.deployProxy(Soulbound, [
+      await randomness.getAddress(),
+    ]);
     await soulbound.waitForDeployment();
 
     // the tokens to mint
@@ -44,7 +51,34 @@ describe("Soulbound", function () {
       mock20,
       tokens,
       tokensSecondWeek,
+      randomness,
     };
+  }
+
+  async function fulfillRandomness(
+    randomness: Contract,
+    requestId: bigint | string | number,
+    duration: bigint | string | number
+  ) {
+    const randomValue = ethers.toBigInt(ethers.randomBytes(32));
+
+    const hash = await randomness.hash(randomValue);
+
+    await randomness.commitRandomness(requestId, hash);
+
+    // that ends the commit period
+
+    await ethers.provider.send("evm_increaseTime", [
+      Number(duration.toString()),
+    ]);
+
+    await randomness.revealRandomness(requestId, randomValue);
+
+    // now we end the reveal period and mine a block
+    await ethers.provider.send("evm_increaseTime", [
+      Number(duration.toString()),
+    ]);
+    await ethers.provider.send("evm_mine", []);
   }
 
   describe("Deployment", function () {
@@ -416,6 +450,106 @@ describe("Soulbound", function () {
 
         totalPoints += tokens[i].points;
       }
+    });
+
+    it("adding tokens shouldn't change the request picks", async function () {
+      const { soulbound, tokens } = await loadFixture(deployFixture);
+
+      // we mint the first 3 tokens
+      let totalPoints = 0;
+      for (let i = 0; i < 3; i++) {
+        const tree = getTree(tokens);
+        const proof = getProof({
+          tree,
+          receiver: tokens[i].address,
+        });
+        await soulbound.mint(
+          tokens[i].address,
+          {
+            points: tokens[i].points,
+            rank: tokens[i].rank,
+            week: tokens[i].week,
+          },
+          proof!.proof
+        );
+
+        totalPoints += tokens[i].points;
+      }
+
+      // we request to get 2 winners
+      const pick = await soulbound.requestWeeklyPointsPick(0, 2);
+
+      // we safe the pick requests
+      const pickRequests = await soulbound.readWeeklyPointsPick(0, 0);
+
+      // we mint the 4th and 5th tokens
+      for (let i = 3; i < 5; i++) {
+        const tree = getTree(tokens);
+        const proof = getProof({
+          tree,
+          receiver: tokens[i].address,
+        });
+        await soulbound.mint(
+          tokens[i].address,
+          {
+            points: tokens[i].points,
+            rank: tokens[i].rank,
+            week: tokens[i].week,
+          },
+          proof!.proof
+        );
+
+        totalPoints += tokens[i].points;
+      }
+
+      const pickRequestsAfterNewTokenMints =
+        await soulbound.readWeeklyPointsPick(0, 0);
+
+      expect(pickRequestsAfterNewTokenMints).to.deep.equal(pickRequests);
+    });
+
+    it.only("request total points pick and get the winner", async function () {
+      const { soulbound, tokens, randomness } = await loadFixture(
+        deployFixture
+      );
+
+      // we mint all the tokens
+      let totalPoints = 1;
+      for (let i = 0; i < tokens.length; i++) {
+        const tree = getTree(tokens);
+        const proof = getProof({
+          tree,
+          receiver: tokens[i].address,
+        });
+        await soulbound.mint(
+          tokens[i].address,
+          {
+            points: tokens[i].points,
+            rank: tokens[i].rank,
+            week: tokens[i].week,
+          },
+          proof!.proof
+        );
+
+        totalPoints += tokens[i].points;
+      }
+
+      // we request to get 2 winners
+      await soulbound.requestTotalPointsPick(2);
+
+      // get the randomnessRequestLength
+      const randomnessRequestLength = await soulbound.randomnessRequestLength();
+
+      // we fulfill the randomness
+      await fulfillRandomness(randomness, 1n, randomnessRequestLength);
+
+      const pickRequests = await soulbound.readTotalPointsPick(0);
+      const winner = await soulbound.getTotalWinnerAtIndex(0, 0);
+      const winner2 = await soulbound.getTotalWinnerAtIndex(0, 1);
+
+      console.log(pickRequests);
+      console.log(winner);
+      console.log(winner2);
     });
   });
 });

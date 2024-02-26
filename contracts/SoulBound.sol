@@ -13,6 +13,8 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {ERC721BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import {ERC721EnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
+import {IRandomness} from "./interfaces/IRandomness.sol";
+
 contract Soulbound is
     Initializable,
     ERC721Upgradeable,
@@ -31,6 +33,12 @@ contract Soulbound is
         uint16 week;
     }
 
+    // @todo: a bit unnecessary to have a struct here but not so imporant at the current state
+    struct PointsPick {
+        uint48 totalPoints;
+        uint128 randomnessRequestId;
+    }
+
     enum MintingStatus {
         NotMinted,
         Minted
@@ -43,16 +51,25 @@ contract Soulbound is
     mapping(uint16 => mapping(uint16 => MintingStatus))
         public weekToRankToMintingStatus;
 
+    IRandomness public randomness;
+    uint24 public randomnessRequestLength; // the duration for the randomness generation
+
+    PointsPick[] internal _totalPointsPicks;
+    mapping(uint16 => PointsPick[]) internal _weeklyPointsPicks;
+
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
         _disableInitializers();
     }
 
-    function initialize() public initializer {
+    function initialize(IRandomness _randomness) public initializer {
         __ERC721_init("Polymon Binder Battles", "PMBB");
         __ERC721Enumerable_init();
         __ERC721Burnable_init();
         __Ownable_init(msg.sender);
+
+        randomness = _randomness;
+        randomnessRequestLength = 15 minutes;
     }
 
     /** MERKLE TREE ROOTS*/
@@ -142,6 +159,100 @@ contract Soulbound is
         return store.lowerLookup(searchKey);
     }
 
+    /** PICK */
+
+    function requestTotalPointsPick(uint24 amount) public onlyOwner {
+        _requestPick(_totalCumulativePoints, _totalPointsPicks, amount);
+    }
+
+    function requestWeeklyPointsPick(
+        uint16 week,
+        uint24 amount
+    ) public onlyOwner {
+        _requestPick(
+            _weeklyCumulativePoints[week],
+            _weeklyPointsPicks[week],
+            amount
+        );
+    }
+
+    function _requestPick(
+        Checkpoints.Trace208 storage store,
+        PointsPick[] storage picks,
+        uint24 amount
+    ) internal {
+        (, uint48 _newestKey, ) = store.latestCheckpoint();
+        picks.push(
+            PointsPick(
+                _newestKey,
+                randomness.requestRandomness(randomnessRequestLength, amount)
+            )
+        );
+    }
+
+    function readTotalPointsPick(
+        uint256 pickIndex
+    ) public view returns (uint48, uint128) {
+        return (
+            _totalPointsPicks[pickIndex].totalPoints,
+            _totalPointsPicks[pickIndex].randomnessRequestId
+        );
+    }
+
+    function readWeeklyPointsPick(
+        uint16 week,
+        uint256 pickIndex
+    ) public view returns (uint48, uint128) {
+        return (
+            _weeklyPointsPicks[week][pickIndex].totalPoints,
+            _weeklyPointsPicks[week][pickIndex].randomnessRequestId
+        );
+    }
+
+    /** WINNERS */
+
+    function getNumOfWeeklyPicks(uint16 week) public view returns (uint256) {
+        return _weeklyPointsPicks[week].length;
+    }
+
+    function getNumOfTotalPicks() public view returns (uint256) {
+        return _totalPointsPicks.length;
+    }
+
+    function getWeeklyWinnerAtIndex(
+        uint16 week,
+        uint256 pickIndex,
+        uint256 winnerIndex
+    ) public view returns (uint256, address) {
+        uint256 tokenId = upperLookupWeekly(
+            _getRandomIndex(_weeklyPointsPicks[week], pickIndex, winnerIndex),
+            week
+        );
+        return (tokenId, ownerOf(tokenId));
+    }
+
+    function getTotalWinnerAtIndex(
+        uint256 pickIndex,
+        uint256 winnerIndex
+    ) public view returns (uint256, address) {
+        uint256 tokenId = upperLookupTotal(
+            _getRandomIndex(_totalPointsPicks, pickIndex, winnerIndex)
+        );
+        return (tokenId, ownerOf(tokenId));
+    }
+
+    function _getRandomIndex(
+        PointsPick[] storage picks,
+        uint256 pickIndex, // index of the pick
+        uint256 winnerIndex // index of the winner
+    ) internal view returns (uint48) {
+        PointsPick memory pick = picks[pickIndex];
+        uint256[] memory randomnessValues = randomness.readRandomness(
+            pick.randomnessRequestId
+        );
+        return uint48(randomnessValues[winnerIndex] % pick.totalPoints);
+    }
+
     /** TOKEN URI */
 
     function tokenURI(
@@ -182,6 +293,18 @@ contract Soulbound is
         );
 
         return string(abi.encodePacked("data:application/json;base64,", json));
+    }
+
+    /** ADMIN SETTERS */
+
+    function setRandomness(IRandomness _randomness) public onlyOwner {
+        randomness = _randomness;
+    }
+
+    function setRandomnessRequestLength(
+        uint24 _randomnessRequestLength
+    ) public onlyOwner {
+        randomnessRequestLength = _randomnessRequestLength;
     }
 
     /** ERC721 OVERRIDES */

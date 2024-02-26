@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers, upgrades } from "hardhat";
 
-describe.only("Randomness", async () => {
+describe("Randomness", async () => {
   async function deployFixture() {
     const Randomness = await ethers.getContractFactory("Randomness");
     const randomness = await upgrades.deployProxy(Randomness, []);
@@ -23,7 +23,7 @@ describe.only("Randomness", async () => {
       randomness: Contract,
       duration: number = 300
     ) => {
-      const tx = await randomness.requestRandomness(duration);
+      const tx = await randomness.requestRandomness(duration, 1);
       await tx.wait();
       const receipt = await tx.wait();
 
@@ -213,7 +213,7 @@ describe.only("Randomness", async () => {
 
       const randomnessValue = await randomness.readRandomness(requestId);
 
-      expect(randomnessValue).to.equal(randomValue);
+      expect(randomnessValue[0]).to.equal(randomValue);
     });
 
     // should not be able to get the randomness if commit phase not over

@@ -4,11 +4,12 @@ pragma solidity 0.8.20;
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract Randomness is Initializable {
-    event RandomnessRequestEvent(uint128 id, uint24 duration);
+    event RandomnessRequestEvent(uint128 id, uint24 duration, uint24 amount);
 
     struct RandomnessRequest {
         uint256 commitEndtime;
         uint24 duration;
+        uint24 amount; // the amount of requested random Numbers
     }
 
     uint128 idCounter;
@@ -29,16 +30,20 @@ contract Randomness is Initializable {
 
     /** REQUEST RANDOMNESS */
 
-    function requestRandomness(uint24 duration) public returns (uint128) {
+    function requestRandomness(
+        uint24 duration,
+        uint24 amount
+    ) public returns (uint128) {
         require(duration <= 1 days, "duration too long");
 
         uint256 commitEndtime = block.timestamp + duration;
         idToRequest[++idCounter] = RandomnessRequest({
             commitEndtime: commitEndtime,
-            duration: duration
+            duration: duration,
+            amount: amount
         });
 
-        emit RandomnessRequestEvent(idCounter, duration);
+        emit RandomnessRequestEvent(idCounter, duration, amount);
         return idCounter;
     }
 
@@ -107,7 +112,7 @@ contract Randomness is Initializable {
 
     /** READ RANDOMNESS */
 
-    function readRandomness(uint128 id) public view returns (uint256) {
+    function readRandomness(uint128 id) public view returns (uint256[] memory) {
         // only returns if the reveal period is over and there is a valid randomness (which isn't 0)
         RandomnessRequest memory request = idToRequest[id];
 
@@ -120,7 +125,22 @@ contract Randomness is Initializable {
 
         require(idToRandomness[id] != 0, "randomness not set");
 
-        return idToRandomness[id];
+        uint256[] memory randomnessArray = new uint256[](request.amount);
+
+        if (request.amount == 1) {
+            randomnessArray[0] = idToRandomness[id];
+            return randomnessArray;
+        }
+
+        // we extend the randomness to get the right number of random numbers if we have more than 1
+        // this is not super clean but okay for our use case
+        for (uint256 i = 0; i < request.amount; i++) {
+            randomnessArray[i] = uint256(
+                keccak256(abi.encodePacked(idToRandomness[id], i))
+            );
+        }
+
+        return randomnessArray;
     }
 
     /** UTILS */
